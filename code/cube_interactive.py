@@ -1,13 +1,14 @@
-#----------------------------------------------------------------------
+# ----------------------------------------------------------------------
 # Matplotlib Rubik's cube simulator
 # Written by Jake Vanderplas
 # Adapted from cube code written by David Hogg
 #   https://github.com/davidwhogg/MagicCube
-
+import Queue
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import widgets
 from projection import Quaternion, project_points
+from pprint import pprint
 
 """
 Sticker representation
@@ -43,6 +44,7 @@ After any rotation, this can be used to quickly restore the cube to
 canonical position.
 """
 
+
 class Cube:
     """Magic Cube Representation"""
     # define some attribues
@@ -74,9 +76,9 @@ class Cube:
     # Define rotation angles and axes for the six sides of the cube
     x, y, z = np.eye(3)
     rots = [Quaternion.from_v_theta(np.eye(3)[0], theta)
-    for theta in (np.pi / 2, -np.pi / 2)]
+            for theta in (np.pi / 2, -np.pi / 2)]
     rots += [Quaternion.from_v_theta(np.eye(3)[1], theta)
-    for theta in (np.pi / 2, -np.pi / 2, np.pi, 2 * np.pi)]
+             for theta in (np.pi / 2, -np.pi / 2, np.pi, 2 * np.pi)]
 
     # define face movements
     facesdict = dict(F=z, B=-z,
@@ -142,6 +144,7 @@ class Cube:
             colors.append(colors_i)
 
         self._face_centroids = np.vstack(face_centroids)
+        self._goal_centroids = np.vstack(face_centroids)
         self._faces = np.vstack(faces)
         self._sticker_centroids = np.vstack(sticker_centroids)
         self._stickers = np.vstack(stickers)
@@ -178,7 +181,7 @@ class Cube:
                 self._move_list[-1] = (f, ntot, layer)
         else:
             self._move_list.append((f, n, layer))
-        
+
         v = self.facesdict[f]
         r = Quaternion.from_v_theta(v, n * np.pi / 2)
         M = r.as_rotation_matrix()
@@ -256,7 +259,7 @@ class InteractiveCube(plt.Axes):
         self._shift = False  # shift key pressed
         self._digit_flags = np.zeros(10, dtype=bool)  # digits 0-9 pressed
 
-        self._current_rot = self._start_rot  #current rotation state
+        self._current_rot = self._start_rot  # current rotation state
         self._face_polys = None
         self._sticker_polys = None
 
@@ -277,7 +280,7 @@ class InteractiveCube(plt.Axes):
         self._initialize_widgets()
 
         # write some instructions
-        self.figure.text(0.05, 0.05,
+        self.figure.text(0.05, 0.15,
                          "Mouse/arrow keys adjust view\n"
                          "U/D/L/R/B/F keys turn faces\n"
                          "(hold shift for counter-clockwise)",
@@ -291,6 +294,16 @@ class InteractiveCube(plt.Axes):
         self._ax_solve = self.figure.add_axes([0.55, 0.05, 0.2, 0.075])
         self._btn_solve = widgets.Button(self._ax_solve, 'Solve Cube')
         self._btn_solve.on_clicked(self._solve_cube)
+
+        self._ax_breadth_first_search = self.figure.add_axes(
+            [0.35, 0.05, 0.2, 0.075])
+        self._btn_breadth_first_search = widgets.Button(
+            self._ax_breadth_first_search, 'BFS')
+        self._btn_breadth_first_search.on_clicked(self._solve_cube_with_bfs)
+
+        self._ax_a_star = self.figure.add_axes([0.15, 0.05, 0.2, 0.075])
+        self._btn_a_star = widgets.Button(self._ax_a_star, 'A*')
+        self._btn_a_star.on_clicked(self._solve_cube_with_a_star)
 
     def _project(self, pts):
         return project_points(pts, self._current_rot, self._view, [0, 1, 0])
@@ -356,6 +369,68 @@ class InteractiveCube(plt.Axes):
             self.rotate_face(face, -n, layer, steps=3)
         self.cube._move_list = []
 
+    def _solve_cube_with_bfs(self, *args):
+        q = Queue.Queue()
+        goal = self.cube._goal_centroids
+        start = self.cube._face_centroids
+        q.put(start)
+        pprint(self.cube._face_centroids)
+
+        if start == goal:
+            print "Already Solved!"
+            return 
+
+        while not q.empty():
+            path = q.get()
+            for t in range(6):
+                #make moviment here
+                #rotation    
+                if self.cube._face_centroids.all() == goal:
+                    print("Found it!")
+        # pprint(self.cube._face_centroids[0])
+        # pprint(self.cube._face_centroids[1])
+        # pprint(self.cube._face_centroids[2])
+        # pprint(self.cube._face_centroids[3])
+        # pprint(self.cube._face_centroids[1])
+        # while not q.empty():
+         #   latest = q.get()
+        #    for t in range(6):
+         #       face = ""
+          #      for key, value in self.cube.facesdict.items():
+          #          if value == latest[t]:
+           #             face = key
+           #     self.rotate_face(face, -t, latest[t], steps=3)
+
+           #     if self.cube._face_centroids.all() == self.cube._goal_centroids.all():
+           #         print("Found it!")
+           #         return self.cube._face_centroids
+           #     q.put(self.cube._face_centroids)
+            # pprint(self.cube._colors)
+            # pprint(self.cube._face_centroids)
+            # v = self.facesdict[f]
+            # r = Quaternion.from_v_theta(v, n * np.pi / 2)
+            # M = r.as_rotation_matrix()
+
+            # proj = np.dot(self._face_centroids[:, :3], v)
+            # cubie_width = 2. / self.N
+            # pprint(self.cube._move_list[:])
+            # pprint(self.cube._faces)
+            # explored = []
+            # self.rotate_face('U', -1.0, 0)
+            # self.cube._move_list = []
+            # move_list = self.cube._move_list[:]
+            # self.rotate_face(1,-1, 1, steps=3)
+            # for (face, n, layer) in move_list[::-1]:
+            # self.rotate_face(face, -n, layer, steps=3)
+            # self.cube._move_list = []
+
+    def _solve_cube_with_a_star(self, *args):
+        move_list = self.cube._move_list[:]
+        self.rotate_face('U', -1, 1) 
+       # for (face, n, layer) in move_list[::-1]:
+        #    
+        # self.cube._move_list = []
+
     def _key_press(self, event):
         """Handler for key press events"""
         if event.key == 'shift':
@@ -393,7 +468,7 @@ class InteractiveCube(plt.Axes):
                     self.rotate_face(event.key.upper(), direction, layer=d)
             else:
                 self.rotate_face(event.key.upper(), direction)
-                
+
         self._draw_cube()
 
     def _key_release(self, event):
@@ -448,6 +523,7 @@ class InteractiveCube(plt.Axes):
 
                 self.figure.canvas.draw()
 
+
 if __name__ == '__main__':
     import sys
     try:
@@ -458,14 +534,14 @@ if __name__ == '__main__':
     c = Cube(N)
 
     # do a 3-corner swap
-    #c.rotate_face('R')
-    #c.rotate_face('D')
-    #c.rotate_face('R', -1)
-    #c.rotate_face('U', -1)
-    #c.rotate_face('R')
-    #c.rotate_face('D', -1)
-    #c.rotate_face('R', -1)
-    #c.rotate_face('U')
+    # c.rotate_face('R')
+    # c.rotate_face('D')
+    # c.rotate_face('R', -1)
+    # c.rotate_face('U', -1)
+    # c.rotate_face('R')
+    # c.rotate_face('D', -1)
+    # c.rotate_face('R', -1)
+    # c.rotate_face('U')
 
     c.draw_interactive()
 

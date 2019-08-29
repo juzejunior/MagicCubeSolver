@@ -124,7 +124,7 @@ class Quaternion:
                          v[2] * v[2] * (1. - c) + c]],
                        order='F')
         return mat.T.reshape(shape + (3, 3))
-        
+
 
 class CubeAxes(Axes):
     """Axes to show 3D cube
@@ -259,8 +259,8 @@ class CubeAxes(Axes):
 
         elif event.key == 'right':
             self.current_rot = (self.current_rot
-                                    * Quaternion.from_v_theta(self._ax_LR,
-                                                              self._step_LR))
+                                * Quaternion.from_v_theta(self._ax_LR,
+                                                          self._step_LR))
         elif event.key == 'left':
             self.current_rot = (self.current_rot
                                 * Quaternion.from_v_theta(self._ax_LR,
@@ -305,7 +305,7 @@ class CubeAxes(Axes):
 
             self.current_rot = (self.current_rot * rot1 * rot2)
             self.draw_cube()
-            
+
 
 if __name__ == '__main__':
     fig = plt.figure()
