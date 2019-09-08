@@ -22,25 +22,88 @@ class Cube:
             self.F.append([])
             self.B.append([])
             for _ in range(n):
-                count += 1
-                self.R[i].append(f'R{count}')
-                self.L[i].append(f'L{count}')
-                self.U[i].append(f'U{count}')
-                self.D[i].append(f'D{count}')
-                self.F[i].append(f'F{count}')
-                self.B[i].append(f'B{count}')
-        self.cube = {'R': self.R,
+               count += 1
+               self.R[i].append(f'R{count}')
+               self.L[i].append(f'L{count}')
+               self.U[i].append(f'U{count}')
+               self.D[i].append(f'D{count}')
+               self.F[i].append(f'F{count}')
+               self.B[i].append(f'B{count}')
+        self.goal = {'R': self.R,
                      'L': self.L,
                      'U': self.U,
                      'D': self.D,
                      'F': self.F,
                      'B': self.B}
-        self.goal = self.cube.copy()
-        #if sequence:
+        self.initialize_state(n)
+        # self.goal = self.cube.copy()
+        # if sequence:
         #    self.scramble(self.cube, num_moves, sequence)
-        #else:
+        # else:
         #    self.scramble(self.cube, num_moves)
-        #self.start = self.cube
+        # self.start = self.cube
+
+    def initialize_state(self, n):
+        w, h = 2, 2
+        self.Rs = []
+        self.Ls = []
+        self.Us = []
+        self.Ds = []
+        self.Fs = []
+        self.Bs = []
+
+        for i in range(n):
+            self.Rs.append([])
+            self.Ls.append([])
+            self.Us.append([])
+            self.Ds.append([])
+            self.Fs.append([])
+            self.Bs.append([])
+
+        file = open("cube.txt", "r")
+        face = 0
+        for line in file:
+            face += 1
+            splited = line.split(',')
+            if face == 1:
+                self.Rs[0].append(splited[0])
+                self.Rs[0].append(splited[1])
+                self.Rs[1].append(splited[2])
+                self.Rs[1].append(splited[3].replace("\n",""))
+            elif face == 2:
+                self.Ls[0].append(splited[0])
+                self.Ls[0].append(splited[1])
+                self.Ls[1].append(splited[2])
+                self.Ls[1].append(splited[3].replace("\n",""))
+            elif face == 3:
+                self.Us[0].append(splited[0])
+                self.Us[0].append(splited[1])
+                self.Us[1].append(splited[2])
+                self.Us[1].append(splited[3].replace("\n",""))
+            elif face == 4:
+                self.Ds[0].append(splited[0])
+                self.Ds[0].append(splited[1])
+                self.Ds[1].append(splited[2])
+                self.Ds[1].append(splited[3].replace("\n",""))    
+            elif face == 5:
+                self.Fs[0].append(splited[0])
+                self.Fs[0].append(splited[1])
+                self.Fs[1].append(splited[2])
+                self.Fs[1].append(splited[3].replace("\n",""))
+            elif face == 6:        
+                self.Bs[0].append(splited[0])
+                self.Bs[0].append(splited[1])
+                self.Bs[1].append(splited[2])
+                self.Bs[1].append(splited[3].replace("\n",""))
+
+        self.cube = {'R': self.Rs,
+                     'L': self.Ls,
+                     'U': self.Us,
+                     'D': self.Ds,
+                     'F': self.Fs,
+                     'B': self.Bs}
+        self.start = self.cube
+
 
     def print_cube(self):
         space = ''
